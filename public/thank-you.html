@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="10;url=index.html">
+  <title>Request Received | Outcalt Advisory Group</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    :root {
+      --navy: #071522;
+      --gold: #c8a15a;
+      --gold2: #e1c078;
+      --white: #ffffff;
+      --muted: #b9c4d2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--navy);
+      color: var(--white);
+      font-family: Inter, Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 700px;
+      padding: 50px 40px;
+      border: 1px solid rgba(200, 161, 90, 0.3);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+    h1 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(32px, 5vw, 48px);
+      margin: 0 0 20px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+    .gold { color: var(--gold2); }
+    p {
+      font-size: 18px;
+      color: var(--muted);
+      margin: 0 0 30px;
+      line-height: 1.5;
+    }
+    .countdown {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 20px;
+    }
+    .countdown span {
+      color: var(--gold2);
+      font-weight: 700;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 24px;
+      color: var(--gold2);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: 1px solid rgba(200,161,90,.5);
+      padding: 12px 24px;
+      border-radius: 999px;
+      transition: background 0.2s;
+    }
+    .back-link:hover {
+      background: rgba(200,161,90,.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span class="gold">Request Received.</span><br>We'll Review and Respond Directly.</h1>
+    <p>Thank you for reaching out. Your inquiry has been received and will be reviewed promptly.</p>
+    <p class="countdown">Redirecting to homepage in <span id="timer">10</span> seconds.</p>
+    <a href="index.html" class="back-link">Return to Homepage Now →</a>
+  </div>
+  <script>
+    let seconds = 10;
+    const timerEl = document.getElementById('timer');
+    setInterval(function() {
+      seconds--;
+      if (seconds >= 0) timerEl.textContent = seconds;
+    }, 1000);
+  </script>
+</body>
+</html>
