@@ -13,6 +13,21 @@ router.post('/login', async (req, res) => {
   }
 
   try {
+    // Check credentials against environment variables if database is not available
+    if (!pool) {
+      const envUsername = 'admin';
+      const envPassword = process.env.ADMIN_PASSWORD || 'changeme';
+      
+      if (username === envUsername && password === envPassword) {
+        const token = generateToken(1);
+        res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        return res.json({ token, message: 'Login successful' });
+      } else {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+    }
+
+    // Use database if available
     const result = await pool.query('SELECT * FROM admin_users WHERE username = $1', [username]);
     
     if (result.rows.length === 0) {
@@ -51,6 +66,11 @@ router.post('/change-password', authMiddleware, async (req, res) => {
   }
 
   try {
+    // If no database, reject password changes
+    if (!pool) {
+      return res.status(400).json({ error: 'Password changes not available without database configuration' });
+    }
+
     const result = await pool.query('SELECT * FROM admin_users WHERE id = $1', [userId]);
     const user = result.rows[0];
 
