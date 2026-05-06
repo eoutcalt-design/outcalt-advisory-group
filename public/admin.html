@@ -524,8 +524,13 @@
 
                 <div class="form-group">
                     <label>Body Content *</label>
-                    <textarea id="postBody" placeholder="Write your blog post content here..." required></textarea>
+                    <div id="postBody" style="background: white; border: 1px solid #ddd; border-radius: 4px; min-height: 400px;"></div>
                 </div>
+                <style>
+                    .ql-toolbar { border-top-left-radius: 4px; border-top-right-radius: 4px; }
+                    .ql-container { border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; font-size: 14px; }
+                    .ql-editor { min-height: 350px; }
+                </style>
 
                 <div class="form-group">
                     <label>Featured Image</label>
@@ -711,7 +716,7 @@
         function closePostModal() {
             document.getElementById('postModal').classList.remove('active');
             document.getElementById('postForm').reset();
-            tinymce.get('postBody').setContent('');
+            quill.setContents([]);
             currentPostId = null;
             document.getElementById('modalTitle').textContent = 'New Blog Post';
         }
@@ -729,7 +734,7 @@
                 document.getElementById('modalTitle').textContent = 'Edit Blog Post';
                 document.getElementById('postTitle').value = post.title;
                 document.getElementById('postExcerpt').value = post.excerpt;
-                tinymce.get('postBody').setContent(post.body);
+                quill.setContents(JSON.parse(post.body || '[]'), 'silent');
                 document.getElementById('imageAlt').value = post.featured_image_alt || '';
                 document.getElementById('postCategory').value = post.category || 'General';
                 document.getElementById('postSlug').value = post.slug;
@@ -820,7 +825,7 @@
                 title: document.getElementById('postTitle').value,
                 slug: document.getElementById('postSlug').value || generateSlug(document.getElementById('postTitle').value),
                 excerpt: document.getElementById('postExcerpt').value,
-                body: document.getElementById('postBody').value,
+                body: JSON.stringify(quill.getContents()),
                 featured_image: document.getElementById('featuredImage').value,
                 featured_image_alt: document.getElementById('imageAlt').value,
                 category: document.getElementById('postCategory').value,
