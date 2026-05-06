@@ -1,12 +1,25 @@
 import pkg from 'pg';
 const { Pool } = pkg;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+let pool = null;
+
+// Only create pool if DATABASE_URL is provided
+if (process.env.DATABASE_URL) {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  });
+} else {
+  console.warn('DATABASE_URL not set. Database features will be disabled.');
+}
 
 export async function initializeDatabase() {
+  // Skip if no database URL is configured
+  if (!pool) {
+    console.log('Skipping database initialization (DATABASE_URL not set)');
+    return;
+  }
+
   try {
     // Create admin users table
     await pool.query(`

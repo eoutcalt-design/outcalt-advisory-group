@@ -54,16 +54,24 @@ async function startServer() {
   try {
     await initializeDatabase();
     
-    // Check if admin user exists, if not create one
-    const adminCheck = await pool.query('SELECT * FROM admin_users WHERE username = $1', ['admin']);
-    if (adminCheck.rows.length === 0) {
-      const defaultPassword = process.env.ADMIN_PASSWORD || 'changeme';
-      const hashedPassword = await hashPassword(defaultPassword);
-      await pool.query(
-        'INSERT INTO admin_users (username, password_hash) VALUES ($1, $2)',
-        ['admin', hashedPassword]
-      );
-      console.log('Default admin user created. Username: admin, Password: ' + defaultPassword);
+    // Check if admin user exists, if not create one (only if database is available)
+    if (pool) {
+      try {
+        const adminCheck = await pool.query('SELECT * FROM admin_users WHERE username = $1', ['admin']);
+        if (adminCheck.rows.length === 0) {
+          const defaultPassword = process.env.ADMIN_PASSWORD || 'changeme';
+          const hashedPassword = await hashPassword(defaultPassword);
+          await pool.query(
+            'INSERT INTO admin_users (username, password_hash) VALUES ($1, $2)',
+            ['admin', hashedPassword]
+          );
+          console.log('Default admin user created. Username: admin, Password: ' + defaultPassword);
+        }
+      } catch (dbError) {
+        console.warn('Could not check admin user:', dbError.message);
+      }
+    } else {
+      console.log('Database not configured. Admin features will be unavailable.');
     }
 
     app.listen(PORT, () => {
