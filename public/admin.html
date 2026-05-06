@@ -586,19 +586,22 @@
     </div>
 
     <script>
-        // Initialize TinyMCE
-        tinymce.init({
-            selector: '#postBody',
-            height: 400,
-            plugins: 'link image code lists table',
-            toolbar: 'undo redo | formatselect | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | code',
-            menubar: 'file edit view insert format tools table',
-            content_css: 'default',
-            relative_urls: false,
-            remove_script_host: false,
-            convert_urls: false,
-            branding: false,
-            promotion: false
+        // Initialize Quill Editor
+        const quill = new Quill('#postBody', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'header': 1 }, { 'header': 2 }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Write your blog post content here...'
         });
 
         let currentPostId = null;
