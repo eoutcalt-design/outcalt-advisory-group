@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Outcalt Advisory Group</title>
     <link rel="stylesheet" href="/style.css">
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -523,14 +524,6 @@
 
                 <div class="form-group">
                     <label>Body Content *</label>
-                    <div class="editor-toolbar">
-                        <button type="button" onclick="formatText('bold')">Bold</button>
-                        <button type="button" onclick="formatText('italic')">Italic</button>
-                        <button type="button" onclick="formatText('underline')">Underline</button>
-                        <button type="button" onclick="formatText('h2')">Heading</button>
-                        <button type="button" onclick="formatText('ul')">List</button>
-                        <button type="button" onclick="formatText('link')">Link</button>
-                    </div>
                     <textarea id="postBody" placeholder="Write your blog post content here..." required></textarea>
                 </div>
 
@@ -587,6 +580,21 @@
     </div>
 
     <script>
+        // Initialize TinyMCE
+        tinymce.init({
+            selector: '#postBody',
+            height: 400,
+            plugins: 'link image code lists table',
+            toolbar: 'undo redo | formatselect | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | code',
+            menubar: 'file edit view insert format tools table',
+            content_css: 'default',
+            relative_urls: false,
+            remove_script_host: false,
+            convert_urls: false,
+            branding: false,
+            promotion: false
+        });
+
         let currentPostId = null;
         let authToken = localStorage.getItem('authToken');
 
@@ -702,7 +710,10 @@
 
         function closePostModal() {
             document.getElementById('postModal').classList.remove('active');
+            document.getElementById('postForm').reset();
+            tinymce.get('postBody').setContent('');
             currentPostId = null;
+            document.getElementById('modalTitle').textContent = 'New Blog Post';
         }
 
         document.getElementById('closeModal').addEventListener('click', closePostModal);
@@ -718,7 +729,7 @@
                 document.getElementById('modalTitle').textContent = 'Edit Blog Post';
                 document.getElementById('postTitle').value = post.title;
                 document.getElementById('postExcerpt').value = post.excerpt;
-                document.getElementById('postBody').value = post.body;
+                tinymce.get('postBody').setContent(post.body);
                 document.getElementById('imageAlt').value = post.featured_image_alt || '';
                 document.getElementById('postCategory').value = post.category || 'General';
                 document.getElementById('postSlug').value = post.slug;
@@ -845,36 +856,7 @@
             return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         }
 
-        function formatText(format) {
-            const textarea = document.getElementById('postBody');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const selectedText = textarea.value.substring(start, end);
 
-            let formatted = selectedText;
-            switch(format) {
-                case 'bold':
-                    formatted = `**${selectedText}**`;
-                    break;
-                case 'italic':
-                    formatted = `*${selectedText}*`;
-                    break;
-                case 'underline':
-                    formatted = `<u>${selectedText}</u>`;
-                    break;
-                case 'h2':
-                    formatted = `\n## ${selectedText}\n`;
-                    break;
-                case 'ul':
-                    formatted = `\n- ${selectedText}\n`;
-                    break;
-                case 'link':
-                    formatted = `[${selectedText}](url)`;
-                    break;
-            }
-
-            textarea.value = textarea.value.substring(0, start) + formatted + textarea.value.substring(end);
-        }
 
         document.getElementById('metaDescription').addEventListener('input', (e) => {
             document.getElementById('charCount').textContent = e.target.value.length;
