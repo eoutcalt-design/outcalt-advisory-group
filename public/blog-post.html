@@ -72,6 +72,92 @@
         metaDesc.setAttribute('content', post.meta_description || post.excerpt);
       }
       
+      // Convert Quill Delta to HTML
+      function deltaToHtml(delta) {
+        if (typeof delta === 'string') {
+          try {
+            delta = JSON.parse(delta);
+          } catch (e) {
+            return delta; // If not JSON, return as is
+          }
+        }
+        
+        if (!delta || !delta.ops) {
+          return '';
+        }
+        
+        let html = '';
+        let currentBlock = '';
+        let blockType = 'p';
+        let listType = null;
+        let listItems = [];
+        
+        delta.ops.forEach((op, index) => {
+          if (op.insert) {
+            const text = op.insert;
+            let formatted = text;
+            
+            if (op.attributes) {
+              if (op.attributes.bold) formatted = `<strong>${formatted}</strong>`;
+              if (op.attributes.italic) formatted = `<em>${formatted}</em>`;
+              if (op.attributes.code) formatted = `<code>${formatted}</code>`;
+              if (op.attributes.link) formatted = `<a href="${op.attributes.link}">${formatted}</a>`;
+            }
+            
+            currentBlock += formatted;
+          }
+          
+          // Handle block-level attributes
+          if (op.attributes) {
+            if (op.attributes.header) {
+              if (currentBlock) {
+                html += `<h${op.attributes.header}>${currentBlock}</h${op.attributes.header}>`;
+                currentBlock = '';
+              }
+            } else if (op.attributes.list) {
+              if (currentBlock) {
+                listItems.push(currentBlock);
+                currentBlock = '';
+              }
+              if (op.attributes.list !== listType) {
+                if (listItems.length > 0) {
+                  const tag = listType === 'bullet' ? 'ul' : 'ol';
+                  html += `<${tag}>${listItems.map(item => `<li>${item}</li>`).join('')}</${tag}>`;
+                  listItems = [];
+                }
+                listType = op.attributes.list;
+              }
+            }
+          }
+          
+          // Handle line breaks
+          if (text.includes('\n')) {
+            if (listType) {
+              listItems.push(currentBlock);
+              currentBlock = '';
+            } else if (currentBlock) {
+              html += `<p>${currentBlock}</p>`;
+              currentBlock = '';
+            }
+          }
+        });
+        
+        // Close any remaining list
+        if (listItems.length > 0) {
+          const tag = listType === 'bullet' ? 'ul' : 'ol';
+          html += `<${tag}>${listItems.map(item => `<li>${item}</li>`).join('')}</${tag}>`;
+        }
+        
+        // Add remaining content
+        if (currentBlock) {
+          html += `<p>${currentBlock}</p>`;
+        }
+        
+        return html;
+      }
+      
+      const bodyHtml = deltaToHtml(post.body);
+      
       const container = document.getElementById('postContainer');
       container.innerHTML = `
         <div class="blog-post-wrapper">
@@ -84,7 +170,7 @@
             ${post.featured_image ? `<img src="${post.featured_image}" alt="${post.featured_image_alt || post.title}" class="blog-post-featured-image">` : ''}
           </div>
           <div class="blog-post-content">
-            ${post.body}
+            ${bodyHtml}
           </div>
           <div class="blog-post-footer">
             <a href="blog.html" class="back-to-blog">← Back to Blog</a>
